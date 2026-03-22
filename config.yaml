@@ -1,0 +1,10 @@
+dataset:
+  output: /Users/yromko/prj/itmo/ml_data/data/raw/dataset.parquet
+  total_rows: 127600
+  duplicates_removed: 0
+sources:
+- file: source_hf.csv
+  type: hf
+  dataset: ag_news
+  url: https://huggingface.co/datasets/ag_news
+  rows_raw: 127600

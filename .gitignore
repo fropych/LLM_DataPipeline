@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Claude Code
+.claude/
+.mcp.json
+
+# Data (large files)
+data/raw/*.csv
+data/raw/*.parquet
+data/cleaned/*.parquet
+data/labeled/*.parquet
+data/labeled/*.json
+data/labeled/*.csv
+data/labeled/*.xml
+data/*.json
+
+# Models (large binary files)
+models/*.joblib
+
+# Task file
+TASK.md
