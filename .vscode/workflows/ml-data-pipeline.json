@@ -1,0 +1,728 @@
+{
+  "id": "workflow-1774112075672",
+  "name": "ml-data-pipeline",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "group-1",
+      "type": "group",
+      "name": "group-1",
+      "position": {
+        "x": 1000,
+        "y": 25
+      },
+      "data": {
+        "label": "1 - DataCollectionAgent"
+      },
+      "style": {
+        "width": 1100,
+        "height": 600
+      }
+    },
+    {
+      "id": "group-2",
+      "type": "group",
+      "name": "group-2",
+      "position": {
+        "x": 2535,
+        "y": -15
+      },
+      "data": {
+        "label": "2 - DataQualityAgent"
+      },
+      "style": {
+        "width": 1700,
+        "height": 650
+      }
+    },
+    {
+      "id": "group-3",
+      "type": "group",
+      "name": "group-3",
+      "position": {
+        "x": 4300,
+        "y": 25
+      },
+      "data": {
+        "label": "3 - AnnotationAgent"
+      },
+      "style": {
+        "width": 1100,
+        "height": 600
+      }
+    },
+    {
+      "id": "group-4",
+      "type": "group",
+      "name": "group-4",
+      "position": {
+        "x": 5850,
+        "y": 50
+      },
+      "data": {
+        "label": "4 - ActiveLearningAgent"
+      },
+      "style": {
+        "width": 1050,
+        "height": 550
+      }
+    },
+    {
+      "id": "start-1",
+      "type": "start",
+      "name": "start-1",
+      "position": {
+        "x": 100,
+        "y": 300
+      },
+      "data": {
+        "label": "Start"
+      }
+    },
+    {
+      "id": "prompt-task",
+      "type": "prompt",
+      "name": "prompt-task",
+      "position": {
+        "x": 330,
+        "y": 300
+      },
+      "data": {
+        "prompt": "ML DATA PIPELINE\n\nDescribe your ML task:\n1. What ML problem? (classification, NER, sentiment, etc.)\n2. What data modality? (text, audio, image)\n3. What are the target classes/labels?\n4. Any specific dataset? (HuggingFace name, Kaggle, etc.)"
+      }
+    },
+    {
+      "id": "skill-setup",
+      "type": "skill",
+      "name": "0-setup-env",
+      "position": {
+        "x": 700,
+        "y": 300
+      },
+      "data": {
+        "name": "0-setup-env",
+        "description": "Initialize ML project environment with uv and create directory structure",
+        "scope": "project",
+        "skillPath": "/Users/yromko/prj/itmo/ml_data/.claude/skills/0-setup-env/SKILL.md",
+        "validationStatus": "valid",
+        "outputPorts": 1
+      }
+    },
+    {
+      "id": "ask-source",
+      "type": "askUserQuestion",
+      "name": "ask-source",
+      "position": {
+        "x": 50,
+        "y": 225
+      },
+      "data": {
+        "questionText": "Which second data source besides HuggingFace dataset?",
+        "options": [
+          {
+            "label": "Scrape website",
+            "description": "Scrape data from a website. Specify URL and CSS selectors."
+          },
+          {
+            "label": "REST API",
+            "description": "Fetch from REST API. Specify endpoint and parameters."
+          }
+        ],
+        "outputPorts": 2
+      },
+      "parentId": "group-1"
+    },
+    {
+      "id": "agent-collect-scrape",
+      "type": "subAgent",
+      "name": "agent-collect-scrape",
+      "position": {
+        "x": 400,
+        "y": 75
+      },
+      "data": {
+        "description": "Collect data: HF dataset + web scraping + merge",
+        "prompt": "You are DataCollectionAgent. Execute skills in order:\n1. /1-load-dataset\n2. /1-scrape (ask for URL/selectors if needed)\n3. /1-merge\nCheck each output exists before next skill.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/collect-data-hf-dataset--web-scraping--merge.md",
+        "commandScope": "project"
+      },
+      "parentId": "group-1"
+    },
+    {
+      "id": "agent-collect-api",
+      "type": "subAgent",
+      "name": "agent-collect-api",
+      "position": {
+        "x": 400,
+        "y": 375
+      },
+      "data": {
+        "description": "Collect data: HF dataset + REST API + merge",
+        "prompt": "You are DataCollectionAgent. Execute skills in order:\n1. /1-load-dataset\n2. /1-fetch-api (ask for endpoint if needed)\n3. /1-merge\nCheck each output exists before next skill.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/collect-data-hf-dataset--rest-api--merge.md",
+        "commandScope": "project"
+      },
+      "parentId": "group-1"
+    },
+    {
+      "id": "agent-eda",
+      "type": "subAgent",
+      "name": "agent-eda",
+      "position": {
+        "x": 775,
+        "y": 225
+      },
+      "data": {
+        "description": "Run EDA on merged dataset",
+        "prompt": "Execute /1-eda on data/raw/dataset.parquet. Verify outputs and print findings.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/run-eda-on-merged-dataset.md",
+        "commandScope": "project"
+      },
+      "parentId": "group-1"
+    },
+    {
+      "id": "prompt-eda",
+      "type": "prompt",
+      "name": "prompt-eda",
+      "position": {
+        "x": 2200,
+        "y": 300
+      },
+      "data": {
+        "prompt": "EDA REVIEW\n\nCheck: reports/eda_plots/, notebooks/eda.ipynb. Review before proceeding."
+      }
+    },
+    {
+      "id": "skill-detect",
+      "type": "skill",
+      "name": "2-detect-issues",
+      "position": {
+        "x": 50,
+        "y": 275
+      },
+      "data": {
+        "name": "2-detect-issues",
+        "description": "Detect quality issues — missing, duplicates, outliers, imbalance",
+        "scope": "project",
+        "skillPath": "/Users/yromko/prj/itmo/ml_data/.claude/skills/2-detect-issues/SKILL.md",
+        "validationStatus": "valid",
+        "outputPorts": 1
+      },
+      "parentId": "group-2"
+    },
+    {
+      "id": "ask-strategy",
+      "type": "askUserQuestion",
+      "name": "ask-strategy",
+      "position": {
+        "x": 375,
+        "y": 275
+      },
+      "data": {
+        "questionText": "Quality issues found. Which cleaning strategy?",
+        "options": [
+          {
+            "label": "Conservative",
+            "description": "Median fill + drop dupes + clip IQR"
+          },
+          {
+            "label": "Aggressive",
+            "description": "Drop missing + drop dupes + z-score > 3"
+          }
+        ],
+        "outputPorts": 2
+      },
+      "parentId": "group-2"
+    },
+    {
+      "id": "skill-fix-cons",
+      "type": "skill",
+      "name": "2-fix",
+      "position": {
+        "x": 725,
+        "y": 75
+      },
+      "data": {
+        "name": "2-fix",
+        "description": "Apply conservative cleaning",
+        "scope": "project",
+        "skillPath": "/Users/yromko/prj/itmo/ml_data/.claude/skills/2-fix/SKILL.md",
+        "validationStatus": "valid",
+        "executionPrompt": "CONSERVATIVE: median fill, drop duplicates, clip IQR",
+        "outputPorts": 1
+      },
+      "parentId": "group-2"
+    },
+    {
+      "id": "skill-fix-aggr",
+      "type": "skill",
+      "name": "2-fix",
+      "position": {
+        "x": 725,
+        "y": 475
+      },
+      "data": {
+        "name": "2-fix",
+        "description": "Apply aggressive cleaning",
+        "scope": "project",
+        "skillPath": "/Users/yromko/prj/itmo/ml_data/.claude/skills/2-fix/SKILL.md",
+        "validationStatus": "valid",
+        "executionPrompt": "AGGRESSIVE: drop missing, drop duplicates, z-score > 3",
+        "outputPorts": 1
+      },
+      "parentId": "group-2"
+    },
+    {
+      "id": "skill-compare",
+      "type": "skill",
+      "name": "2-compare",
+      "position": {
+        "x": 1075,
+        "y": 275
+      },
+      "data": {
+        "name": "2-compare",
+        "description": "Compare before/after cleaning",
+        "scope": "project",
+        "skillPath": "/Users/yromko/prj/itmo/ml_data/.claude/skills/2-compare/SKILL.md",
+        "validationStatus": "valid",
+        "outputPorts": 1
+      },
+      "parentId": "group-2"
+    },
+    {
+      "id": "ask-quality",
+      "type": "askUserQuestion",
+      "name": "ask-quality",
+      "position": {
+        "x": 1375,
+        "y": 275
+      },
+      "data": {
+        "questionText": "Review quality_comparison.md. Proceed?",
+        "options": [
+          {
+            "label": "Proceed",
+            "description": "Continue to labeling"
+          },
+          {
+            "label": "Re-clean",
+            "description": "Try other strategy"
+          }
+        ],
+        "outputPorts": 2
+      },
+      "parentId": "group-2"
+    },
+    {
+      "id": "ask-label",
+      "type": "askUserQuestion",
+      "name": "ask-label",
+      "position": {
+        "x": 50,
+        "y": 225
+      },
+      "data": {
+        "questionText": "How to auto-label the data?",
+        "options": [
+          {
+            "label": "Zero-shot",
+            "description": "Transformers zero-shot (BART-MNLI)"
+          },
+          {
+            "label": "Keyword rules",
+            "description": "Regex/keyword rules you define"
+          }
+        ],
+        "outputPorts": 2
+      },
+      "parentId": "group-3"
+    },
+    {
+      "id": "agent-annot-zs",
+      "type": "subAgent",
+      "name": "agent-annot-zs",
+      "position": {
+        "x": 400,
+        "y": 75
+      },
+      "data": {
+        "description": "Annotate: zero-shot + spec + quality + export",
+        "prompt": "You are AnnotationAgent. Execute skills:\n1. /3-auto-label (zero-shot)\n2. /3-generate-spec\n3. /3-check-quality\n4. /3-export-labelstudio\nPrint: label dist, confidence, flagged count.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/annotate-zero-shot--spec--quality--export.md",
+        "commandScope": "project"
+      },
+      "parentId": "group-3"
+    },
+    {
+      "id": "agent-annot-kw",
+      "type": "subAgent",
+      "name": "agent-annot-kw",
+      "position": {
+        "x": 400,
+        "y": 375
+      },
+      "data": {
+        "description": "Annotate: keyword rules + spec + quality + export",
+        "prompt": "You are AnnotationAgent. Execute skills:\n1. /3-auto-label (keyword rules, ask user for rules)\n2. /3-generate-spec\n3. /3-check-quality\n4. /3-export-labelstudio\nPrint: label dist, confidence, flagged count.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/annotate-keyword-rules--spec--quality--export.md",
+        "commandScope": "project"
+      },
+      "parentId": "group-3"
+    },
+    {
+      "id": "prompt-hitl",
+      "type": "prompt",
+      "name": "prompt-hitl",
+      "position": {
+        "x": 775,
+        "y": 225
+      },
+      "data": {
+        "prompt": "HUMAN-IN-THE-LOOP\n\nReview review_queue.csv, correct labels, save as review_queue_corrected.csv."
+      },
+      "parentId": "group-3"
+    },
+    {
+      "id": "skill-merge-corr",
+      "type": "skill",
+      "name": "3-merge-corrections",
+      "position": {
+        "x": 5500,
+        "y": 300
+      },
+      "data": {
+        "name": "3-merge-corrections",
+        "description": "Merge human corrections into dataset",
+        "scope": "project",
+        "skillPath": "/Users/yromko/prj/itmo/ml_data/.claude/skills/3-merge-corrections/SKILL.md",
+        "validationStatus": "valid",
+        "outputPorts": 1
+      }
+    },
+    {
+      "id": "ask-al",
+      "type": "askUserQuestion",
+      "name": "ask-al",
+      "position": {
+        "x": 50,
+        "y": 225
+      },
+      "data": {
+        "questionText": "AL: which strategies to compare?",
+        "options": [
+          {
+            "label": "Entropy vs Random",
+            "description": "Uncertainty (entropy) vs random"
+          },
+          {
+            "label": "Margin vs Random",
+            "description": "Margin sampling vs random"
+          }
+        ],
+        "outputPorts": 2
+      },
+      "parentId": "group-4"
+    },
+    {
+      "id": "agent-al-ent",
+      "type": "subAgent",
+      "name": "agent-al-ent",
+      "position": {
+        "x": 400,
+        "y": 75
+      },
+      "data": {
+        "description": "AL: entropy vs random + report",
+        "prompt": "Execute skills:\n1. /4-al-cycle (ENTROPY vs RANDOM, N=50, 5 iters, batch=20)\n2. /4-al-report (learning curves + notebook)\nPrint: accuracy/F1, examples saved.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/al-entropy-vs-random--report.md",
+        "commandScope": "project"
+      },
+      "parentId": "group-4"
+    },
+    {
+      "id": "agent-al-mar",
+      "type": "subAgent",
+      "name": "agent-al-mar",
+      "position": {
+        "x": 400,
+        "y": 375
+      },
+      "data": {
+        "description": "AL: margin vs random + report",
+        "prompt": "Execute skills:\n1. /4-al-cycle (MARGIN vs RANDOM, N=50, 5 iters, batch=20)\n2. /4-al-report (learning curves + notebook)\nPrint: accuracy/F1, examples saved.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/al-margin-vs-random--report.md",
+        "commandScope": "project"
+      },
+      "parentId": "group-4"
+    },
+    {
+      "id": "skill-train",
+      "type": "skill",
+      "name": "5-train",
+      "position": {
+        "x": 7000,
+        "y": 300
+      },
+      "data": {
+        "name": "5-train",
+        "description": "Train final model, evaluate accuracy + F1",
+        "scope": "project",
+        "skillPath": "/Users/yromko/prj/itmo/ml_data/.claude/skills/5-train/SKILL.md",
+        "validationStatus": "valid",
+        "outputPorts": 1
+      }
+    },
+    {
+      "id": "agent-report",
+      "type": "subAgent",
+      "name": "agent-report",
+      "position": {
+        "x": 7300,
+        "y": 300
+      },
+      "data": {
+        "description": "Compile README, data card, run_pipeline.py",
+        "prompt": "Execute /5-final-report. Compile all reports into README.md (5 sections), data card, run_pipeline.py. Verify completeness.",
+        "model": "sonnet",
+        "outputPorts": 1,
+        "commandFilePath": "/Users/yromko/prj/itmo/ml_data/.claude/agents/compile-readme-data-card-run_pipelinepy.md",
+        "commandScope": "project"
+      }
+    },
+    {
+      "id": "end-1",
+      "type": "end",
+      "name": "end-1",
+      "position": {
+        "x": 7600,
+        "y": 300
+      },
+      "data": {
+        "label": "End"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "start-1",
+      "to": "prompt-task",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c2",
+      "from": "prompt-task",
+      "to": "skill-setup",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c3",
+      "from": "skill-setup",
+      "to": "ask-source",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c4",
+      "from": "ask-source",
+      "to": "agent-collect-scrape",
+      "fromPort": "branch-0",
+      "toPort": "input"
+    },
+    {
+      "id": "c5",
+      "from": "ask-source",
+      "to": "agent-collect-api",
+      "fromPort": "branch-1",
+      "toPort": "input"
+    },
+    {
+      "id": "c6",
+      "from": "agent-collect-scrape",
+      "to": "agent-eda",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c7",
+      "from": "agent-collect-api",
+      "to": "agent-eda",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c8",
+      "from": "agent-eda",
+      "to": "prompt-eda",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c9",
+      "from": "prompt-eda",
+      "to": "skill-detect",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c10",
+      "from": "skill-detect",
+      "to": "ask-strategy",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c11",
+      "from": "ask-strategy",
+      "to": "skill-fix-cons",
+      "fromPort": "branch-0",
+      "toPort": "input"
+    },
+    {
+      "id": "c12",
+      "from": "ask-strategy",
+      "to": "skill-fix-aggr",
+      "fromPort": "branch-1",
+      "toPort": "input"
+    },
+    {
+      "id": "c13",
+      "from": "skill-fix-cons",
+      "to": "skill-compare",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c14",
+      "from": "skill-fix-aggr",
+      "to": "skill-compare",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c15",
+      "from": "skill-compare",
+      "to": "ask-quality",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c16",
+      "from": "ask-quality",
+      "to": "ask-label",
+      "fromPort": "branch-0",
+      "toPort": "input"
+    },
+    {
+      "id": "c17",
+      "from": "ask-quality",
+      "to": "ask-strategy",
+      "fromPort": "branch-1",
+      "toPort": "input"
+    },
+    {
+      "id": "c18",
+      "from": "ask-label",
+      "to": "agent-annot-zs",
+      "fromPort": "branch-0",
+      "toPort": "input"
+    },
+    {
+      "id": "c19",
+      "from": "ask-label",
+      "to": "agent-annot-kw",
+      "fromPort": "branch-1",
+      "toPort": "input"
+    },
+    {
+      "id": "c20",
+      "from": "agent-annot-zs",
+      "to": "prompt-hitl",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c21",
+      "from": "agent-annot-kw",
+      "to": "prompt-hitl",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c22",
+      "from": "prompt-hitl",
+      "to": "skill-merge-corr",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c23",
+      "from": "skill-merge-corr",
+      "to": "ask-al",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c24",
+      "from": "ask-al",
+      "to": "agent-al-ent",
+      "fromPort": "branch-0",
+      "toPort": "input"
+    },
+    {
+      "id": "c25",
+      "from": "ask-al",
+      "to": "agent-al-mar",
+      "fromPort": "branch-1",
+      "toPort": "input"
+    },
+    {
+      "id": "c26",
+      "from": "agent-al-ent",
+      "to": "skill-train",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c27",
+      "from": "agent-al-mar",
+      "to": "skill-train",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c28",
+      "from": "skill-train",
+      "to": "agent-report",
+      "fromPort": "output",
+      "toPort": "input"
+    },
+    {
+      "id": "c29",
+      "from": "agent-report",
+      "to": "end-1",
+      "fromPort": "output",
+      "toPort": "input"
+    }
+  ],
+  "createdAt": "2026-03-21T16:54:35.672Z",
+  "updatedAt": "2026-03-21T16:54:35.672Z",
+  "subAgentFlows": []
+}

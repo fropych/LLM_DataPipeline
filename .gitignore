@@ -9,12 +9,9 @@ __pycache__/
 Thumbs.db
 
 # IDE
-.vscode/
 .idea/
 
 # Claude Code
-.claude/
-.mcp.json
 
 # Data (large files)
 data/raw/*.csv
